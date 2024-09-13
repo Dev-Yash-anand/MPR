@@ -54,6 +54,8 @@
     <div class="form-container">
         <h1>Upload an Excel File</h1>
         <form id="uploadForm" enctype="multipart/form-data">
+            <label for="senderEmail">Sender Email:</label>
+            <input type="email" name="senderEmail" id="senderEmail" required><br><br>
             <input type="file" name="xlsxFile" id="xlsxFile" accept=".xlsx" required><br><br>
             <button type="submit">Upload</button>
         </form>
@@ -72,9 +74,8 @@
                     processData: false,
                     success: function (data) {
                         if (data.length > 0) {
-                            $('#results').html('<h2>Results:</h2><pre>cannot sent to ' + data + '</pre>');
-                        }
-                        else {
+                            $('#results').html('<h2>Results:</h2><pre>Cannot send to ' + data.join(', ') + '</pre>');
+                        } else {
                             $('#results').html('<h2>Results:</h2><pre>Data Sent Successfully</pre>');
                         }
                     },

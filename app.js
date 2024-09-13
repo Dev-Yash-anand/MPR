@@ -12,14 +12,6 @@ function isValidEmail(email) {
     return emailRegex.test(email);
 }
 
-var transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: 'anshumanpandey182005@gmail.com',
-        pass: 'vogn kquw wyir klag'
-    }
-});
-
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, 'uploads/');
@@ -41,11 +33,27 @@ app.post('/upload', upload.single('xlsxFile'), (req, res) => {
     if (!req.file) {
         return res.status(400).send('No file uploaded.');
     }
+
+    const senderEmail = req.body.senderEmail; // Get sender email from the form data
+
+    if (!isValidEmail(senderEmail)) {
+        return res.status(400).send('Invalid sender email.');
+    }
+
+    var transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: senderEmail, // Use sender email received from form
+            pass: 'dpqi caba izqd bybv' // Make sure to use the correct password
+        }
+    });
+
     const results = [];
     const workbook = xlsx.readFile(req.file.path);
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
     const data = xlsx.utils.sheet_to_json(worksheet, { header: 1 });
+
     data.forEach((row, rowIndex) => {
         const rowData = {};
         row.forEach((cell, columnIndex) => {
@@ -53,16 +61,17 @@ app.post('/upload', upload.single('xlsxFile'), (req, res) => {
         });
         results.push(rowData);
     });
+
     results.map(item => {
         Object.values(item).forEach(value => {
             if (isValidEmail(value)) {
                 var mailOptions = {
-                    from: 'anshumanpandey182005@gmail.com',
+                    from: senderEmail, // Use the sender email here
                     to: String(value),
                     subject: 'Sending Email using Node.js',
                     text: 'That was easy!'
                 };
-                transporter.sendMail(mailOptions, function(error, info){
+                transporter.sendMail(mailOptions, function (error, info) {
                     if (error) {
                         notsentemails.push(value);
                         console.log(error);
@@ -73,6 +82,7 @@ app.post('/upload', upload.single('xlsxFile'), (req, res) => {
             }
         });
     });
+
     res.json(notsentemails);
 });
 
