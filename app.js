@@ -28,14 +28,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
-
+ 
 app.post('/upload', upload.single('xlsxFile'), (req, res) => {
     if (!req.file) {
         return res.status(400).send('No file uploaded.');
     }
 
     const senderEmail = req.body.senderEmail; // Get sender email from the form data
-
+    const senderPassword = req.body.senderPassword; // Get sender password from the form data
     if (!isValidEmail(senderEmail)) {
         return res.status(400).send('Invalid sender email.');
     }
@@ -44,7 +44,7 @@ app.post('/upload', upload.single('xlsxFile'), (req, res) => {
         service: 'gmail',
         auth: {
             user: senderEmail, // Use sender email received from form
-            pass: 'dpqi caba izqd bybv' // Make sure to use the correct password
+            pass: senderPassword // Make sure to use the correct password
         }
     });
 
