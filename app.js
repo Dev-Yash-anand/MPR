@@ -28,14 +28,18 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
- 
+
 app.post('/upload', upload.single('xlsxFile'), (req, res) => {
+    notsentemails = []; // Clear the array at the beginning of each request
+
     if (!req.file) {
         return res.status(400).send('No file uploaded.');
     }
 
-    const senderEmail = req.body.senderEmail; // Get sender email from the form data
-    const senderPassword = req.body.senderPassword; // Get sender password from the form data
+    const senderEmail = req.body.senderEmail;
+    const senderPassword = req.body.senderPassword;
+    const customMessage = req.body.customMessage; // Capture the custom message
+
     if (!isValidEmail(senderEmail)) {
         return res.status(400).send('Invalid sender email.');
     }
@@ -43,8 +47,8 @@ app.post('/upload', upload.single('xlsxFile'), (req, res) => {
     var transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-            user: senderEmail, // Use sender email received from form
-            pass: senderPassword // Make sure to use the correct password
+            user: senderEmail,
+            pass: senderPassword
         }
     });
 
@@ -54,6 +58,7 @@ app.post('/upload', upload.single('xlsxFile'), (req, res) => {
     const worksheet = workbook.Sheets[sheetName];
     const data = xlsx.utils.sheet_to_json(worksheet, { header: 1 });
 
+    // Extract emails from the spreadsheet
     data.forEach((row, rowIndex) => {
         const rowData = {};
         row.forEach((cell, columnIndex) => {
@@ -62,28 +67,36 @@ app.post('/upload', upload.single('xlsxFile'), (req, res) => {
         results.push(rowData);
     });
 
-    results.map(item => {
-        Object.values(item).forEach(value => {
-            if (isValidEmail(value)) {
-                var mailOptions = {
-                    from: senderEmail, // Use the sender email here
-                    to: String(value),
-                    subject: 'Sending Email using Node.js',
-                    text: 'That was easy!'
-                };
-                transporter.sendMail(mailOptions, function (error, info) {
-                    if (error) {
-                        notsentemails.push(value);
-                        console.log(error);
-                    } else {
-                        console.log('Email sent: ' + info.response);
-                    }
-                });
-            }
+    let emailPromises = results.map(item => {
+        return new Promise((resolve) => {
+            Object.values(item).forEach(value => {
+                if (isValidEmail(value)) {
+                    var mailOptions = {
+                        from: senderEmail,
+                        to: String(value),
+                        subject: 'Sending Email using Node.js',
+                        text: customMessage || 'That was easy!' // Use the custom message here
+                    };
+                    transporter.sendMail(mailOptions, function (error, info) {
+                        if (error) {
+                            notsentemails.push(value); // Add failed email to array
+                            console.log('Error sending to:', value, error);
+                        } else {
+                            console.log('Email sent: ' + info.response);
+                        }
+                        resolve(); // Resolve after the email is processed
+                    });
+                } else {
+                    resolve(); // Skip if it's not a valid email
+                }
+            });
         });
     });
 
-    res.json(notsentemails);
+    // Wait for all email operations to finish
+    Promise.all(emailPromises).then(() => {
+        res.json(notsentemails); // Send the failed emails to the frontend
+    });
 });
 
 const PORT = process.env.PORT || 3000;

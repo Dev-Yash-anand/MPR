@@ -28,6 +28,11 @@
         form {
             text-align: center;
         }
+        textarea {
+            width: 80%;
+            height: 100px;
+            margin: 10px 0;
+        }
         button {
             padding: 10px 70px;
             background-color: #4CAF50;
@@ -52,13 +57,15 @@
 </head>
 <body>
     <div class="form-container">
-        <h1>Upload an Excel File</h1>
+        <h1>Upload an Excel File here</h1>
         <form id="uploadForm" enctype="multipart/form-data">
             <label for="senderEmail">Sender Email:</label>
             <input type="email" name="senderEmail" id="senderEmail" required><br><br>
             <label for="senderPassword">Sender Password:</label>
             <input type="password" name="senderPassword" id="senderPassword" required><br><br>
-            <a href="https://shorturl.at/mfVoL">Click here to get your app password</a><br><br>
+            <label for="customMessage">Custom Message:</label><br>
+            <textarea name="customMessage" id="customMessage" required placeholder="Enter your custom message here..."></textarea><br><br>
+            <a target="_blank" href="https://shorturl.at/mfVoL">Click here to get your app password</a><br><br>
             <input type="file" name="xlsxFile" id="xlsxFile" accept=".xlsx" required><br><br>
             <button type="submit">Upload</button>
         </form>
@@ -68,6 +75,7 @@
         $(document).ready(function () {
             $('#uploadForm').on('submit', function (e) {
                 e.preventDefault();
+
                 var formData = new FormData(this);
                 $.ajax({
                     url: '/upload',
@@ -77,10 +85,9 @@
                     processData: false,
                     success: function (data) {
                         if (data.length > 0) {
-                            $('#results').html('<h2>Results:</h2><pre>Cannot send to ' + data.join(', ') + '</pre>');
-                            data.length = 0;
+                            $('#results').html('<h2>Failed Emails:</h2><pre>' + data.join(', ') + '</pre>');
                         } else {
-                            $('#results').html('<h2>Results:</h2><pre>Data Sent Successfully</pre>');
+                            $('#results').html('<h2>Results:</h2><pre>All emails sent successfully!</pre>');
                         }
                     },
                     error: function (jqXHR, textStatus, errorThrown) {
