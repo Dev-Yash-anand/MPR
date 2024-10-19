@@ -112,6 +112,36 @@ app.post('/upload', upload.single('xlsxFile'), async (req, res) => {
         });
     });
 
+//     let emailPromises = results.map(item => {
+//     return new Promise((resolve) => {
+//         Object.values(item).forEach(value => {
+//             if (isValidEmail(value)) {
+//                 var mailOptions = {
+//                     from: senderEmail,
+//                     to: String(value),
+//                     subject: 'Sending Email using Node.js',
+//                     text: customMessage || 'That was easy!'
+//                 };
+//                 transporter.sendMail(mailOptions, function (error, info) {
+//                     if (error) {
+//                         // Customize the error message when the email fails to send
+//                         notsentemails.push({
+//                             email: value,
+//                             message: `You need to login ${senderEmail} first`
+//                         });
+//                         console.log('Error sending to:', value, error);
+//                     } else {
+//                         console.log('Email sent: ' + info.response);
+//                     }
+//                     resolve();
+//                 });
+//             } else {
+//                 resolve();
+//             }
+//         });
+//     });
+// });
+
     // Wait for all email operations to finish
     Promise.all(emailPromises).then(() => {
         res.json(notsentemails); // Send the failed emails to the frontend

@@ -3,56 +3,152 @@
 <head>
     <title>Upload Excel File</title>
     <style>
-        html,body {
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
+        /* Reset default margin and padding for all elements */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
+    
+        /* Body and background styling */
         body {
             display: flex;
             justify-content: center;
             align-items: center;
+            height: 100vh;
+            width: 100vw;
+            background: linear-gradient(135deg, #f0f4f8, #c2e9fb);
+            font-family: 'Arial', sans-serif;
         }
+    
+        /* Form container styling */
         .form-container {
-            width: 50%;
-            margin: 0 auto;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            background-color: #f9f9f9;
+            width: 90%;
+            max-width: 600px;
+            padding: 30px;
+            border-radius: 10px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
         }
+    
+        .form-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2);
+        }
+    
         h1 {
-            font-family: sans-serif;
+            font-size: 2rem;
             text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+            font-weight: 600;
         }
-        form {
-            text-align: center;
+    
+        label {
+            font-size: 0.9rem;
+            color: #666;
+            display: block;
+            margin-bottom: 8px;
+            text-align: left;
         }
+    
+        input[type="email"],
+        input[type="password"],
+        input[type="file"],
         textarea {
-            width: 80%;
-            height: 100px;
-            margin: 10px 0;
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 1rem;
+            color: #333;
+            transition: border-color 0.3s, box-shadow 0.3s;
         }
+    
+        input:focus,
+        textarea:focus {
+            border-color: #4CAF50;
+            outline: none;
+            box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+        }
+    
+        textarea {
+            resize: none;
+        }
+    
         button {
-            padding: 10px 70px;
+            padding: 12px 30px;
             background-color: #4CAF50;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
+    
         button:hover {
             background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
+    
+        a {
+            font-size: 0.9rem;
+            color: #4CAF50;
+            text-decoration: none;
+            display: block;
+            margin-top: 10px;
+            text-align: center;
+            transition: color 0.3s;
+        }
+    
+        a:hover {
+            color: #45a049;
+        }
+    
         #results {
             margin-top: 20px;
-            padding: 10px;
-            font-family: sans-serif;
-            border: 1px solid #ccc;
+            padding: 15px;
+            font-family: 'Arial', sans-serif;
             border-radius: 5px;
-            background-color: #fff;
+            background-color: #f8f8f8;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #4CAF50;
+        }
+    
+        /* Highlighted error messages */
+        .highlight {
+            background-color: #f8d7da;
+            /* light red background */
+            color: #721c24;
+            /* dark red text */
+            padding: 12px;
+            margin-bottom: 10px;
+            border-left: 4px solid #f5c6cb;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+    
+        /* Success messages */
+        .success {
+            background-color: #d4edda;
+            /* light green background */
+            color: #155724;
+            /* dark green text */
+            padding: 12px;
+            margin-bottom: 10px;
+            border-left: 4px solid #c3e6cb;
+            font-weight: bold;
+            border-radius: 5px;
         }
     </style>
+
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
@@ -125,6 +221,9 @@
             });
         });
     </script>
+    
 
 </body>
 </html>
+
+
