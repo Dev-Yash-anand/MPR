@@ -4,6 +4,10 @@ const xlsx = require('xlsx');
 const nodemailer = require('nodemailer');
 const path = require('path');
 const app = express();
+const dotenv = require('dotenv');
+const User = require('./model/user.model.js');
+const db = require('./config/db');
+dotenv.config();
 
 var notsentemails = [];
 
@@ -29,7 +33,7 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.post('/upload', upload.single('xlsxFile'), (req, res) => {
+app.post('/upload', upload.single('xlsxFile'), async (req, res) => {
     notsentemails = []; // Clear the array at the beginning of each request
 
     if (!req.file) {
@@ -37,18 +41,33 @@ app.post('/upload', upload.single('xlsxFile'), (req, res) => {
     }
 
     const senderEmail = req.body.senderEmail;
-    const senderPassword = req.body.senderPassword;
-    const customMessage = req.body.customMessage; // Capture the custom message
+    const customMessage = req.body.customMessage;
+    
+    // Check if the user exists in the database
+    let user = await User.findOne({ email: senderEmail });
+    
+    // If user does not exist, generate a password and store it
+    if (!user) {
+        const senderPassword = req.body.senderPassword;
 
-    if (!isValidEmail(senderEmail)) {
-        return res.status(400).send('Invalid sender email.');
+        if (!isValidEmail(senderEmail)) {
+            return res.status(400).send('Invalid sender email.');
+        }
+
+        // Save user to the database
+        user = new User({
+            email: senderEmail,
+            password: senderPassword
+        });
+        await user.save();
     }
 
-    var transporter = nodemailer.createTransport({
+    // Use the stored password for authentication
+    const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
             user: senderEmail,
-            pass: senderPassword
+            pass: user.password // Use the saved hashed password
         }
     });
 
@@ -75,19 +94,19 @@ app.post('/upload', upload.single('xlsxFile'), (req, res) => {
                         from: senderEmail,
                         to: String(value),
                         subject: 'Sending Email using Node.js',
-                        text: customMessage || 'That was easy!' // Use the custom message here
+                        text: customMessage || 'That was easy!'
                     };
                     transporter.sendMail(mailOptions, function (error, info) {
                         if (error) {
-                            notsentemails.push(value); // Add failed email to array
+                            notsentemails.push(value);
                             console.log('Error sending to:', value, error);
                         } else {
                             console.log('Email sent: ' + info.response);
                         }
-                        resolve(); // Resolve after the email is processed
+                        resolve();
                     });
                 } else {
-                    resolve(); // Skip if it's not a valid email
+                    resolve();
                 }
             });
         });
@@ -99,7 +118,27 @@ app.post('/upload', upload.single('xlsxFile'), (req, res) => {
     });
 });
 
+app.get('/getPassword', async (req, res) => {
+    const senderEmail = req.query.email;
+
+    if (!isValidEmail(senderEmail)) {
+        return res.status(400).send('Invalid email.');
+    }
+
+    // Find the user by email in the database
+    const user = await User.findOne({ email: senderEmail });
+
+    if (!user) {
+        return res.status(404).send('User not found.');
+    }
+
+    // Send the password back to the frontend
+    res.json({ password: user.password });
+});
+
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
+    db;
     console.log(`Server is running on port ${PORT}`);
 });

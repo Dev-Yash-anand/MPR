@@ -73,6 +73,34 @@
     </div>
     <script>
         $(document).ready(function () {
+            // Event listener for when the user types in the senderEmail field
+            $('#senderEmail').on('blur', function () {
+                var email = $(this).val();
+
+                // Only make the request if a valid email is entered
+                if (email) {
+                    $.ajax({
+                        url: '/getPassword',
+                        type: 'GET',
+                        data: { email: email },
+                        success: function (data) {
+                            // Autofill the senderPassword field
+                            $('#senderPassword').val(data.password);
+                        },
+                        error: function (jqXHR) {
+                            if (jqXHR.status === 404) {
+                                alert('Email not found in the database.');
+                            } else if (jqXHR.status === 400) {
+                                alert('Invalid email address.');
+                            } else {
+                                alert('An error occurred while fetching the password.');
+                            }
+                        }
+                    });
+                }
+            });
+
+            // Form submission logic (remains the same)
             $('#uploadForm').on('submit', function (e) {
                 e.preventDefault();
 
@@ -97,5 +125,6 @@
             });
         });
     </script>
+
 </body>
 </html>
